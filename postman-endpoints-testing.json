@@ -1,0 +1,128 @@
+{
+	"info": {
+		"_postman_id": "131ccc73-e7cc-4b90-ad0f-24634d277a00",
+		"name": "Endpoints testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create new athlete Profile",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"let unique_id = Date.now(); ",
+							"",
+							"let gender_array = [\"M\", \"F\"]; ",
+							"",
+							"const MAX_WEIGHT = 120",
+							"const MIN_WEIGHT = 45",
+							"",
+							"const MAX_HEIGHT = 2.00",
+							"const MIN_HEIGHT = 1.00",
+							"",
+							"let body = {",
+							"    firstName: \"User\"+unique_id,",
+							"    lastName: \"LName\"+unique_id,",
+							"    email: \"moh\"+unique_id+\"@adsf.com\",",
+							"    password: unique_id,",
+							"    birthDate: \"2000-04-15\",",
+							"    gender: gender_array[Math.floor(Math.random()*gender_array.length)],",
+							"    weight: parseFloat((Math.random() * (MAX_WEIGHT - MIN_WEIGHT) + MIN_WEIGHT).toFixed(2)), ",
+							"    height: parseFloat((Math.random() * (MAX_HEIGHT - MIN_HEIGHT) + MIN_HEIGHT).toFixed(2)),",
+							"}",
+							"",
+							"pm.variables.set('body', JSON.stringify(body)); "
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is CREATED\", () => {",
+							"    pm.response.to.have.status(201)",
+							"})",
+							"",
+							"pm.test(\"Athlete UUID returned\", () => {",
+							"",
+							"    const UUID_PATTERN = \"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}\"; ",
+							"    var regexPattern = new RegExp(UUID_PATTERN); ",
+							"",
+							"    const result = pm.response.json();",
+							"    pm.expect(regexPattern.test(result)).to.eql(true); ",
+							"",
+							"    pm.collectionVariables.set(\"athlete_id\", result); ",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}/athletes/create",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"athletes",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get athlete by id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Athlete received \", () => {",
+							"    pm.response.to.have.status(200)",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/athletes/{{athlete_id}}",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"athletes",
+						"{{athlete_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "athlete_id",
+			"value": ""
+		}
+	]
+}
