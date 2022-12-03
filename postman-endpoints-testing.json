@@ -27,7 +27,7 @@
 							"    firstName: \"User\"+unique_id,",
 							"    lastName: \"LName\"+unique_id,",
 							"    email: \"moh\"+unique_id+\"@adsf.com\",",
-							"    password: unique_id,",
+							"    password: \"PASS\"+unique_id,",
 							"    birthDate: \"2000-04-15\",",
 							"    gender: gender_array[Math.floor(Math.random()*gender_array.length)],",
 							"    weight: parseFloat((Math.random() * (MAX_WEIGHT - MIN_WEIGHT) + MIN_WEIGHT).toFixed(2)), ",
@@ -96,15 +96,25 @@
 						"exec": [
 							"pm.test(\"Athlete received \", () => {",
 							"    pm.response.to.have.status(200)",
+							"    const result = pm.response.json(); ",
+							"    pm.collectionVariables.set('login_email', result.email);",
+							"    pm.collectionVariables.set('login_password', result.password);",
 							"})"
 						],
 						"type": "text/javascript"
 					}
 				}
 			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
 				"method": "GET",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{API_URL}}/athletes/{{athlete_id}}",
 					"host": [
@@ -117,11 +127,184 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Login to account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Should logged succefully\", () => {",
+							"    pm.response.to.have.status(200); ",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{login_email}}\",\n    \"password\": \"{{login_password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}/athletes/login",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"athletes",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create with null informations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Should have bad request response \", () => {",
+							"    pm.response.to.have.status(400)",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"\",\n    \"lastName\": \"\",\n    \"email\": \"\",\n    \"password\": \"\",\n    \"birthDate\": \"\",\n    \"gender\": \"\",\n    \"weight\": \"\",\n    \"height\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}/athletes/create",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"athletes",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login with non correct informations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response is BAD_REQUEST\", () => {",
+							"    pm.response.to.have.status(400); ",
+							"})",
+							"",
+							"pm.test(\"Should have errors\", () => {",
+							"    const result = pm.response.json(); ",
+							"    pm.expect(result.message).to.be.a('string')",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"alkjf@alk.com\",\n    \"password\": \"askldfjiqewr\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}/athletes/login",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"athletes",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create with already existing email",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('BAD REQUEST RESPONSE', () => {",
+							"    pm.response.to.have.status(400)",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"User1670082448934\",\n    \"lastName\": \"LName1670082448934\",\n    \"email\": \"moh1670082448934@adsf.com\",\n    \"password\": \"asdfeqwr\",\n    \"birthDate\": \"2000-04-15\",\n    \"gender\": \"F\",\n    \"weight\": 88.52,\n    \"height\": 1.68\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}/athletes/create",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"athletes",
+						"create"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"variable": [
 		{
 			"key": "athlete_id",
+			"value": ""
+		},
+		{
+			"key": "login_email",
+			"value": ""
+		},
+		{
+			"key": "login_password",
 			"value": ""
 		}
 	]
